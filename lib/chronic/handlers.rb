@@ -62,7 +62,8 @@ module Chronic
       
       definitions = self.definitions(options)
       
-      dates = definitions[:date].select{|handle| handle.format?(options[:format])}
+      # This is a little silly really. Should be a way to order them to the top more sainly
+      dates = definitions[:date].select{|handle| handle.format?(options[:format])} + definitions[:date]
       dates.each do |handler|
         if handler.match(tokens, definitions)
           puts "-date" if Chronic.debug
@@ -480,7 +481,7 @@ module Chronic
   end
   
   class Handler #:nodoc:
-    attr_accessor :pattern, :handler_method
+    attr_accessor :pattern, :handler_method, :format
     
     def initialize(pattern, handler_method, format = [:month, :day, :year])
       @pattern = pattern
