@@ -36,6 +36,16 @@ class TestChronic < Test::Unit::TestCase
     assert_equal 2, tokens.size
   end
   
+  def test_format_options
+    non_us_date = Chronic.parse("12/07/1979", :format => [:day, :month, :year])
+    us_date     = Chronic.parse("12/07/1979")
+    non_us_expectation = Date.parse("1979/07/12")
+    us_expectation = Date.parse("1979/12/07")
+    
+    assert_equal non_us_date.strftime("%d-%m-%Y"), non_us_expectation.strftime("%d-%m-%Y")
+    assert_equal us_date.strftime("%d-%m-%Y"), us_expectation.strftime("%d-%m-%Y")
+  end
+  
   def test_guess
     span = Chronic::Span.new(Time.local(2006, 8, 16, 0), Time.local(2006, 8, 17, 0))
     assert_equal Time.local(2006, 8, 16, 12), Chronic.guess(span)

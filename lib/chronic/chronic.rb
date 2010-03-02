@@ -45,6 +45,7 @@ module Chronic
       default_options = {:context => :future,
                          :now => Chronic.time_class.now,
                          :guess => true,
+                         :format => [:month, :day, :year],
                          :ambiguous_time_range => 6,
                          :endian_precedence => nil}
       options = default_options.merge specified_options

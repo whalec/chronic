@@ -25,6 +25,7 @@ module Chronic
        :date => [Handler.new([:repeater_day_name, :repeater_month_name, :scalar_day, :repeater_time, :separator_slash_or_dash?, :time_zone, :scalar_year], :handle_rdn_rmn_sd_t_tz_sy),
                  Handler.new([:repeater_month_name, :scalar_day, :scalar_year], :handle_rmn_sd_sy),
                  Handler.new([:repeater_month_name, :scalar_day, :scalar_year, :separator_at?, 'time?'], :handle_rmn_sd_sy),
+                 Handler.new([:scalar_day, :separator_slash_or_dash, :scalar_month, :separator_slash_or_dash, :scalar_year, :separator_at?, 'time?'], :handle_sd_sm_sy, [:day, :month, :year]),
                  Handler.new([:repeater_month_name, :scalar_day, :separator_at?, 'time?'], :handle_rmn_sd),
                  Handler.new([:repeater_time, :repeater_day_portion?, :separator_on?, :repeater_month_name, :scalar_day], :handle_rmn_sd_on),
                  Handler.new([:repeater_month_name, :ordinal_day, :separator_at?, 'time?'], :handle_rmn_od),
@@ -60,7 +61,9 @@ module Chronic
       # maybe it's a specific date
       
       definitions = self.definitions(options)
-      definitions[:date].each do |handler|
+      
+      dates = definitions[:date].select{|handle| handle.format?(options[:format])}
+      dates.each do |handler|
         if handler.match(tokens, definitions)
           puts "-date" if Chronic.debug
           good_tokens = tokens.select { |o| !o.get_tag Separator }
@@ -479,14 +482,19 @@ module Chronic
   class Handler #:nodoc:
     attr_accessor :pattern, :handler_method
     
-    def initialize(pattern, handler_method)
+    def initialize(pattern, handler_method, format = [:month, :day, :year])
       @pattern = pattern
       @handler_method = handler_method
+      @format = format
     end
     
     def constantize(name)
       camel = name.to_s.gsub(/(^|_)(.)/) { $2.upcase }
       ::Chronic.module_eval(camel, __FILE__, __LINE__)
+    end
+    
+    def format?(format)
+      @format == format
     end
     
     def match(tokens, definitions)
